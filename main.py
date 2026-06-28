@@ -1,16 +1,14 @@
 import os
 import httpx
+import gradio as gr
 from openai import OpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# 👇 זה החלק הקריטי
-http_client = httpx.Client(verify=False)
-
 client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY"),
-    http_client=http_client
+    http_client=httpx.Client(verify=False)
 )
 
 def generate_command(user_input):
@@ -31,8 +29,11 @@ def generate_command(user_input):
     return response.choices[0].message.content.strip()
 
 
-# בדיקה
-user_input = input("Enter request: ")
-result = generate_command(user_input)
-
-print("CLI Command:", result)
+gr.Interface(
+    fn=generate_command,
+    inputs=gr.Textbox(label="Natural Language Input"),
+    outputs=gr.Textbox(label="CMD Command"),
+    title="Natural Language → CMD Generator",
+    description="Convert natural language into a Windows CMD command.",
+    flagging_mode="never"
+).launch(inbrowser=True)
